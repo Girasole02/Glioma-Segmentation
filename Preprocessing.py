@@ -357,13 +357,15 @@ def statistica_presenza_labels(dataset):
     n_samples = len(dataset)
     stats = []
 
-    print(f"\n{'Label':<5} {'Nome':<6} {'Presenza':>9} {'Percentuale':>15}")
+    print(f"\n{'Label':<6} {'Nome':<6} {'Presenza':>9} {'Percentuale':>15}")
     print("-" * 40)
     for label, count in presenza_label.items():
         percentuale = 100 * count / n_samples
         nome = label_names[label]
         stats.append((nome, count, percentuale))
-        print(f"{label:<5} {nome:<6} {count:>9} {percentuale:>14.1f}%")
+        print(f"{label:<6} {nome:<6} {count:>9} {percentuale:>14.4f}%")
+        if nome=="RC":
+            print(count)
 
     labels = [s[0] for s in stats]
     counts = [s[1] for s in stats]
@@ -435,11 +437,11 @@ if __name__ == "__main__":
     if missing:
         logging.warning(f"Campioni con file mancanti: {missing}")
 
-    dataset = BraTSDataset(csv_file, modalities=list(modalities.keys()), drop_missing=True, norm_fn=None)
+    dataset = BraTSDataset(csv_file, modalities=list(modalities.keys()), drop_missing=False)
 
     check_shapes_and_channels(dataset, modalities=list(modalities.keys()), sample_size=5)
 
-    subset_size = 3
+    subset_size = 10
     subset_indices = list(range(min(subset_size, len(dataset))))
     subset = Subset(dataset, subset_indices)
 
