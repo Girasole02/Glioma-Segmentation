@@ -7,12 +7,12 @@ from matplotlib.patches import Patch
 from torch.utils.data import Dataset, DataLoader, random_split, Subset
 from collections import defaultdict
 from sklearn.model_selection import train_test_split
-
+from config.definitions import ROOT_DIR
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 
 # CONFIGURAZIONE
 class Config:
-    data_dir = r"G:\Il mio Drive\BraTS-GLI-PRE-TrainingData"
+    data_dir = ROOT_DIR / "data/BraTS-GLI-PRE-TrainingData" # r"G:\Il mio Drive\BraTS-GLI-PRE-TrainingData"
     csv_file = "catalog_brats_pre.csv"
     modalities = {'seg': 'seg', 't1ce': 't1c', 't1': 't1n', 'flair': 't2f', 't2': 't2w'}
     required_mods = ['t1', 't1ce', 't2', 'flair', 'seg']
