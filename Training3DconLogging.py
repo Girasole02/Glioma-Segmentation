@@ -11,10 +11,11 @@ from monai.inferers import sliding_window_inference
 from tqdm import tqdm
 from monai.losses import DiceCELoss
 from monai.metrics import HausdorffDistanceMetric
+from config.definitions import ROOT_DIR
 
 
 class Config: 
-    data_dir = r"G:\Il mio Drive\BraTS-GLI-PRE-TainingData"
+    data_dir = ROOT_DIR / "data/BraTS-GLI-PRE-TainingData"  #r"G:\Il mio Drive\BraTS-GLI-PRE-TainingData"
     save_dir = r"G:\Il mio Drive\Logging"
     
     csv_file = "catalog_brats_pre.csv"
@@ -576,10 +577,10 @@ def train_e_validazione(model, train_loader, val_loader, device, num_epochs, cla
                 segs = batch['seg'].to(device)
                 
                 optimizer.zero_grad()
-                outputs = model(inputs)
+                outputs = model(inputs).to(device)
                 segs_target = segs.long()
                 
-                loss = criterion(outputs, segs_target)
+                loss = criterion(outputs.to("cpu"), segs_target.to("cpu"))
                 loss.backward()
                 optimizer.step()
                 
@@ -616,7 +617,7 @@ def train_e_validazione(model, train_loader, val_loader, device, num_epochs, cla
                     outputs = F.interpolate(outputs, size=target_shape, mode='trilinear', align_corners=False)
                     segs_target = segs.long()
                     
-                    loss = criterion(outputs, segs_target)
+                    loss = criterion(outputs.to("cpu"), segs_target.to("cpu"))
                     epoch_val_loss += loss.item()
                     val_batches += 1
                     
@@ -883,25 +884,25 @@ if __name__ == "__main__":
     logging.info(f"Training dataset: {len(train_dataset)} campioni (patches augmentate)")
     logging.info(f"Validation dataset: {len(val_dataset)} campioni (volumi interi)")
     
-    print("\n===== ANALISI STATISTICHE =====")
-    logging.info(f"{datetime.now():%Y-%m-%d %H:%M:%S} - Inizio Analisi statistiche")
-
-    check_dimensioni_uguali(dataset)
-    statistica_presenza_labels(dataset)
-    analisi_voxel_segmentazioni(dataset)
+    # print("\n===== ANALISI STATISTICHE =====")
+    # logging.info(f"{datetime.now():%Y-%m-%d %H:%M:%S} - Inizio Analisi statistiche")
+    #
+    # check_dimensioni_uguali(dataset)
+    # statistica_presenza_labels(dataset)
+    # analisi_voxel_segmentazioni(dataset)
     
 
-    print("\n===== VISUALIZZAZIONI =====")
-    logging.info(f"{datetime.now():%Y-%m-%d %H:%M:%S} - Inizio Visualizzazioni")
-    if len(dataset) > 0:
-        sample = dataset[0]
-        input_tensor = sample['input']
-        seg_tensor = sample['seg']
-        
-        visualizza_modalita_e_segmentazione(sample)
-        visualizzazione_sample(input_tensor, seg_tensor)
-        visualizzazione_segmentazione(seg_tensor)
-        visualizza_tre_assi(sample, modality='t1ce')
+    # print("\n===== VISUALIZZAZIONI =====")
+    # logging.info(f"{datetime.now():%Y-%m-%d %H:%M:%S} - Inizio Visualizzazioni")
+    # if len(dataset) > 0:
+    #     sample = dataset[0]
+    #     input_tensor = sample['input']
+    #     seg_tensor = sample['seg']
+    #
+    #     visualizza_modalita_e_segmentazione(sample)
+    #     visualizzazione_sample(input_tensor, seg_tensor)
+    #     visualizzazione_segmentazione(seg_tensor)
+    #     visualizza_tre_assi(sample, modality='t1ce')
     
     print("\n===== PREPARAZIONE TRAINING =====")
     logging.info(f"{datetime.now():%Y-%m-%d %H:%M:%S} - Inizio Preparazione al Training")
@@ -916,7 +917,8 @@ if __name__ == "__main__":
     logging.info(f"{datetime.now():%Y-%m-%d %H:%M:%S}- Inizio Calcolo Pesi")
     print(f"{'Classe':<10} {'Nome':<10} {'Conteggio':<12} {'Frequenza':<12} {'Peso':<10}")
     print("-" * 60)
-    class_weights = pesi_classi(train_dataset)
+    # class_weights = pesi_classi(train_dataset)
+    class_weights = torch.tensor([0.0139, 2.0532, 0.5066, 1.4263, 0.0133])
     logging.info(f"Pesi finali: {class_weights}")
 
     print("\n===== INIZIO TRAINING =====")
